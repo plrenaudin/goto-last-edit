@@ -1,0 +1,21 @@
+'context-menu':
+  'atom-text-editor': [
+    {
+      'label': 'Goto last edit'
+      'command': 'goto-last-edit:run'
+    }
+  ]
+'menu': [
+  {
+    'label': 'Packages'
+    'submenu': [
+      'label': 'Goto last edit'
+      'submenu': [
+        {
+          'label': 'Run'
+          'command': 'goto-last-edit:run'
+        }
+      ]
+    ]
+  }
+]

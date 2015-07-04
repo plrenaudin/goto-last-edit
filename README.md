@@ -1,5 +1,5 @@
 # goto-last-edit package
 
-A short description of your package. 
+Move the cursor to the last edit position when you type ```ctrl+i``` 
 
-![A screenshot of your package](https://f.cloud.github.com/assets/69169/2290250/c35d867a-a017-11e3-86be-cd7c5bf3ff9b.gif)
+![screencast](http://ks3352370.kimsufi.com/public/gotoLastEdit.gif)

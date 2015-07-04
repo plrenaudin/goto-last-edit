@@ -1,23 +1,50 @@
 GotoLastEdit = require '../lib/goto-last-edit'
 
-# Use the command `window:run-package-specs` (cmd-alt-ctrl-p) to run specs.
-#
-# To run a specific `it` or `describe` block add an `f` to the front (e.g. `fit`
-# or `fdescribe`). Remove the `f` to unfocus the block.
-
 describe "GotoLastEdit", ->
-  [workspaceElement, activationPromise] = []
+  [workspaceElement, promise, thisPackage] = []
 
   beforeEach ->
     workspaceElement = atom.views.getView(atom.workspace)
-    activationPromise = atom.packages.activatePackage('goto-last-edit')
+    atom.project.setPaths([__dirname])
+    spyOn(atom.workspace,'open').andCallThrough()
+    promise = atom.packages.activatePackage('goto-last-edit').then ({mainModule}) ->
+      thisPackage = mainModule
+      atom.workspace.open('../lib/goto-last-edit.coffee')
+      atom.workspace.open('../keymaps/goto-last-edit.cson')
 
   describe "when the goto-last-edit:run event is triggered", ->
-    it "hides and shows the modal panel", ->
-      atom.commands.dispatch workspaceElement, 'goto-last-edit:run'
-
+    it "goes to the last edit", ->
       waitsForPromise ->
-        activationPromise
+        promise
 
       runs ->
-        expect(workspaceElement.querySelector('.goto-last-edit')).toExist()
+        activeEditor = atom.workspace.getActiveTextEditor()
+        expect(activeEditor.getPath()).toContain 'goto-last-edit.cson'
+        # Change cursor position
+        activeEditor.moveDown(2)
+        activeEditor.moveRight(2)
+
+        # Write something
+        activeEditor.insertText('Edit')
+        window.advanceClock(1000)
+        expect(activeEditor.getCursorBufferPosition()).toEqual [2, 6]
+        expect(thisPackage.lastEditPosition.position).toEqual [2, 6]
+
+        # Change editor
+        atom.workspace.getActivePane().activatePreviousItem()
+        activeEditor = atom.workspace.getActiveTextEditor()
+        expect(activeEditor.getPath()).toContain 'goto-last-edit.coffee'
+        expect(activeEditor.getCursorBufferPosition()).toEqual [0, 0]
+
+        # Run the goto last edit command
+        atom.commands.dispatch workspaceElement, 'goto-last-edit:run'
+        options = {
+          initialLine : 2,
+          initialColumn : 6,
+          activatePane : true,
+          searchAllPanes : true
+        }
+        expect(atom.workspace.open.callCount).toBe 3
+        spyCall = atom.workspace.open.mostRecentCall
+        expect(spyCall.args[0]).toContain('goto-last-edit.cson')
+        expect(spyCall.args[1]).toEqual options
