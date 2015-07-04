@@ -30,6 +30,8 @@ module.exports =
         }
         atom.workspace.open(@lastEditPosition.editor.buffer.file?.path, options)
       else
+        if @lastEditPosition.editor not in atom.workspace.getTextEditors()
+          return
         if @lastEditPosition.pane isnt atom.workspace.getActivePane()
           @lastEditPosition.pane.activate()
         if @lastEditPosition.editor isnt atom.workspace.getActiveTextEditor()
