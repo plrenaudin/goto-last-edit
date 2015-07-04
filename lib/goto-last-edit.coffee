@@ -36,9 +36,9 @@ module.exports =
           atom.workspace.getActivePane().activateItem(@lastEditPosition.editor)
         atom.workspace.getActiveTextEditor().setCursorBufferPosition(
           @lastEditPosition.position,
-          autoscroll:false
+          autoscroll: false
         )
-        atom.workspace.getActiveTextEditor().scrollToCursorPosition(center:true)
+        atom.workspace.getActiveTextEditor().scrollToCursorPosition(center: true)
 
   deactivate: ->
     @subscriptions.dispose()
