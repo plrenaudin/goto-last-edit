@@ -6,7 +6,7 @@ describe "GotoLastEdit", ->
   beforeEach ->
     workspaceElement = atom.views.getView(atom.workspace)
     atom.project.setPaths([__dirname])
-    spyOn(atom.workspace,'open').andCallThrough()
+    spyOn(atom.workspace, 'open').andCallThrough()
     promise = atom.packages.activatePackage('goto-last-edit').then ({mainModule}) ->
       thisPackage = mainModule
       atom.workspace.open('../lib/goto-last-edit.coffee')
@@ -39,10 +39,10 @@ describe "GotoLastEdit", ->
         # Run the goto last edit command
         atom.commands.dispatch workspaceElement, 'goto-last-edit:run'
         options = {
-          initialLine : 2,
-          initialColumn : 6,
-          activatePane : true,
-          searchAllPanes : true
+          initialLine: 2,
+          initialColumn: 6,
+          activatePane: true,
+          searchAllPanes: true
         }
         expect(atom.workspace.open.callCount).toBe 3
         spyCall = atom.workspace.open.mostRecentCall

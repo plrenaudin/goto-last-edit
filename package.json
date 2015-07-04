@@ -11,5 +11,8 @@
     "atom": ">=1.0.0 <2.0.0"
   },
   "dependencies": {
+  },
+  "devDependencies": {
+    "coffeelint": "^1.9.7"
   }
 }
