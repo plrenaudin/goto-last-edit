@@ -32,10 +32,8 @@ module.exports =
 
   pushInHistory: (location) ->
     historyMaxSize = atom.config.get('goto-last-edit.historySize')
-    console.log @history.length, historyMaxSize
     if (@history.length >= historyMaxSize)
       @history.splice(0, @history.length - historyMaxSize + 1)
-      console.log 'splice', @history
     @history.push(@lastEditPosition)
 
   #convenient method to check if the change was made on a separate line
