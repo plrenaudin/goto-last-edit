@@ -1,8 +1,15 @@
 {CompositeDisposable} = require 'atom'
 
 module.exports =
+  config:
+    historySize:
+      description: 'Number of edit location to keep in history.'
+      type: 'integer'
+      default: 50
+
   subscriptions: null
   lastEditPosition: null
+  history: []
 
   activate: (state) ->
     @subscriptions = new CompositeDisposable
@@ -11,16 +18,38 @@ module.exports =
       'goto-last-edit:run': => @run()
 
     @subscriptions.add atom.workspace.observeTextEditors (editor) =>
-      editor.onDidStopChanging =>
-        if editor.buffer.previousModifiedStatus or editor.isModified()
-          @lastEditPosition = {
-            pane: atom.workspace.getActivePane(),
-            editor: editor,
-            position: editor.cursors[0]?.getBufferPosition()
-          }
+      editor.onDidStopChanging => @saveCursorPosition(editor)
+
+  saveCursorPosition: (editor) ->
+    if editor.buffer.previousModifiedStatus or editor.isModified()
+      @lastEditPosition = {
+        pane: atom.workspace.getActivePane(),
+        editor: editor,
+        position: editor.cursors[0]?.getBufferPosition()
+      }
+      #add position to history only if different
+      @pushInHistory(@lastEditPosition) unless @hasNotChangedPosition()
+
+  pushInHistory: (location) ->
+    historyMaxSize = atom.config.get('goto-last-edit.historySize')
+    console.log @history.length, historyMaxSize
+    if (@history.length >= historyMaxSize)
+      @history.splice(0, @history.length - historyMaxSize + 1)
+      console.log 'splice', @history
+    @history.push(@lastEditPosition)
+
+  #convenient method to check if the change was made on a separate line
+  #compared to the latest entry in the history
+  hasNotChangedPosition: ->
+    if @history.length > 0
+      last = @history[@history.length - 1]
+      return last.editor is @lastEditPosition.editor and last.position?.row is @lastEditPosition.position?.row
+    else
+      false
 
   run: ->
-    if @lastEditPosition
+    if @history.length > 0
+      @lastEditPosition = @history.pop()
       if @lastEditPosition.editor.buffer.file?.path
         options = {
           initialLine: @lastEditPosition.position.row,

@@ -12,6 +12,52 @@ describe "GotoLastEdit", ->
       atom.workspace.open('../lib/goto-last-edit.coffee')
       atom.workspace.open('../keymaps/goto-last-edit.cson')
 
+  describe "when user writes text", ->
+    it "inserts into the last edit history", ->
+      waitsForPromise ->
+        promise
+
+      runs ->
+        activeEditor = atom.workspace.getActiveTextEditor()
+        # Write something
+        activeEditor.insertText('Edit')
+        window.advanceClock(1000)
+        expect(thisPackage.history.length).toBe 1
+
+        # Change editor
+        atom.workspace.getActivePane().activatePreviousItem()
+        activeEditor = atom.workspace.getActiveTextEditor()
+
+        # Write something
+        activeEditor.insertText('Another Edit')
+        window.advanceClock(1000)
+        expect(thisPackage.history.length).toBe 2
+        expect(thisPackage.history.pop().position).toEqual [0, 12]
+
+    it "does not insert more element than history size", ->
+      atom.config.set('goto-last-edit.historySize', 1)
+
+      waitsForPromise ->
+        promise
+
+      runs ->
+        thisPackage.history = []
+        activeEditor = atom.workspace.getActiveTextEditor()
+        # Write something
+        activeEditor.insertText('Edit')
+        window.advanceClock(1000)
+        expect(thisPackage.history.length).toBe 1
+
+        # Change editor
+        atom.workspace.getActivePane().activatePreviousItem()
+        activeEditor = atom.workspace.getActiveTextEditor()
+
+        # Write something
+        activeEditor.insertText('Another Edit')
+        window.advanceClock(1000)
+        expect(thisPackage.history.length).toBe 1
+        expect(thisPackage.history.pop().position).toEqual [0, 12]
+
   describe "when the goto-last-edit:run event is triggered", ->
     it "goes to the last edit", ->
       waitsForPromise ->
