@@ -1,5 +1,3 @@
-GotoLastEdit = require '../lib/goto-last-edit'
-
 describe "GotoLastEdit", ->
   [workspaceElement, promise, thisPackage] = []
 

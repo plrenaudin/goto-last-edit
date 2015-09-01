@@ -48,7 +48,7 @@ module.exports =
   run: ->
     if @history.length > 0
       @lastEditPosition = @history.pop()
-      if @lastEditPosition.editor.buffer.file?.path
+      if @lastEditPosition.editor.buffer.file?.path and @lastEditPosition.position
         options = {
           initialLine: @lastEditPosition.position.row,
           initialColumn: @lastEditPosition.position.column,
