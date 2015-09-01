@@ -1,7 +1,7 @@
 {
   "name": "goto-last-edit",
   "main": "./lib/goto-last-edit",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Move the cursor to the last edited element",
   "keywords": [],
   "repository": "https://github.com/plrenaudin/goto-last-edit",
