@@ -1,8 +1,12 @@
 'context-menu':
   'atom-text-editor': [
     {
-      'label': 'Goto last edit'
-      'command': 'goto-last-edit:run'
+      'label': 'Goto last edit - Back'
+      'command': 'goto-last-edit:back'
+    }
+    {
+      'label': 'Goto last edit - Froward'
+      'command': 'goto-last-edit:forward'
     }
   ]
 'menu': [
@@ -12,8 +16,12 @@
       'label': 'Goto last edit'
       'submenu': [
         {
-          'label': 'Run'
-          'command': 'goto-last-edit:run'
+          'label': 'Back'
+          'command': 'goto-last-edit:back'
+        }
+        {
+          'label': 'Forward'
+          'command': 'goto-last-edit:forward'
         }
       ]
     ]

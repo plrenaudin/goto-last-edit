@@ -9,19 +9,23 @@ module.exports =
 
   subscriptions: null
   lastEditPosition: null
+  historyPosition: 0
   history: []
 
   activate: (state) ->
     @subscriptions = new CompositeDisposable
 
     @subscriptions.add atom.commands.add 'atom-workspace',
-      'goto-last-edit:run': => @run()
+      'goto-last-edit:back': => @run(true)
+    @subscriptions.add atom.commands.add 'atom-workspace',
+      'goto-last-edit:forward': => @run(false)
 
     @subscriptions.add atom.workspace.observeTextEditors (editor) =>
       editor.onDidStopChanging => @saveCursorPosition(editor)
 
   saveCursorPosition: (editor) ->
     if editor.buffer.previousModifiedStatus or editor.isModified()
+
       @lastEditPosition = {
         pane: atom.workspace.getActivePane(),
         editor: editor,
@@ -30,11 +34,15 @@ module.exports =
       #add position to history only if different
       @pushInHistory(@lastEditPosition) unless @hasNotChangedPosition()
 
-  pushInHistory: (location) ->
+  pushInHistory: () ->
     historyMaxSize = atom.config.get('goto-last-edit.historySize')
+    #if user is in the middle of the history, splice the forward elements
+    if (@historyPosition < @history.length)
+      @history.splice(@historyPosition, @history.length - @historyPosition)
     if (@history.length >= historyMaxSize)
       @history.splice(0, @history.length - historyMaxSize + 1)
     @history.push(@lastEditPosition)
+    @historyPosition++
 
   #convenient method to check if the change was made on a separate line
   #compared to the latest entry in the history
@@ -45,29 +53,31 @@ module.exports =
     else
       false
 
-  run: ->
+  run: (goBack)->
     if @history.length > 0
-      @lastEditPosition = @history.pop()
-      if @lastEditPosition.editor.buffer.file?.path and @lastEditPosition.position
-        options = {
-          initialLine: @lastEditPosition.position.row,
-          initialColumn: @lastEditPosition.position.column,
-          activatePane: true,
-          searchAllPanes: true
-        }
-        atom.workspace.open(@lastEditPosition.editor.buffer.file?.path, options)
-      else
-        if @lastEditPosition.editor not in atom.workspace.getTextEditors()
-          return
-        if @lastEditPosition.pane isnt atom.workspace.getActivePane()
-          @lastEditPosition.pane.activate()
-        if @lastEditPosition.editor isnt atom.workspace.getActiveTextEditor()
-          atom.workspace.getActivePane().activateItem(@lastEditPosition.editor)
-        atom.workspace.getActiveTextEditor().setCursorBufferPosition(
-          @lastEditPosition.position,
-          autoscroll: false
-        )
-        atom.workspace.getActiveTextEditor().scrollToCursorPosition(center: true)
+      @lastEditPosition = if goBack then @history[@historyPosition - 1] else @history[@historyPosition + 1]
+      if @lastEditPosition
+        @historyPosition = if goBack then @historyPosition - 1 else @historyPosition + 1
+        if @lastEditPosition.editor.buffer.file?.path and @lastEditPosition.position
+          options = {
+            initialLine: @lastEditPosition.position.row,
+            initialColumn: @lastEditPosition.position.column,
+            activatePane: true,
+            searchAllPanes: true
+          }
+          atom.workspace.open(@lastEditPosition.editor.buffer.file?.path, options)
+        else
+          if @lastEditPosition.editor not in atom.workspace.getTextEditors()
+            return
+          if @lastEditPosition.pane isnt atom.workspace.getActivePane()
+            @lastEditPosition.pane.activate()
+          if @lastEditPosition.editor isnt atom.workspace.getActiveTextEditor()
+            atom.workspace.getActivePane().activateItem(@lastEditPosition.editor)
+          atom.workspace.getActiveTextEditor().setCursorBufferPosition(
+            @lastEditPosition.position,
+            autoscroll: false
+          )
+          atom.workspace.getActiveTextEditor().scrollToCursorPosition(center: true)
 
   deactivate: ->
     @subscriptions.dispose()
