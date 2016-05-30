@@ -37,8 +37,8 @@ module.exports =
   pushInHistory: () ->
     historyMaxSize = atom.config.get('goto-last-edit.historySize')
     #if user is in the middle of the history, splice the forward elements
-    if (@historyPosition < @history.length)
-      @history.splice(@historyPosition, @history.length - @historyPosition)
+    if (@historyPosition < @history.length - 1)
+      @history.splice(@historyPosition)
     if (@history.length >= historyMaxSize)
       @history.splice(0, @history.length - historyMaxSize + 1)
     @history.push(@lastEditPosition)
@@ -78,6 +78,8 @@ module.exports =
             autoscroll: false
           )
           atom.workspace.getActiveTextEditor().scrollToCursorPosition(center: true)
+      else if not goBack and @historyPosition == @history.length - 1
+        @historyPosition++
 
   deactivate: ->
     @subscriptions.dispose()

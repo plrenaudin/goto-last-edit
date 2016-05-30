@@ -1,3 +1,5 @@
+## 0.3.1 - Fix wrong behaviour with forward feature
+
 ## 0.3.0 - Forward move in history added
 * Pressing `ctrl-alt-i` moves you to the following history position
 
