@@ -1,3 +1,5 @@
+## 0.3.2 - Fix issue when filling the edit location history
+
 ## 0.3.1 - Fix wrong behaviour with forward feature
 
 ## 0.3.0 - Forward move in history added

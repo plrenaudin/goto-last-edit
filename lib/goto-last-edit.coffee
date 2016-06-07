@@ -14,6 +14,7 @@ module.exports =
 
   activate: (state) ->
     @subscriptions = new CompositeDisposable
+    @historyMaxSize = atom.config.get('goto-last-edit.historySize')
 
     @subscriptions.add atom.commands.add 'atom-workspace',
       'goto-last-edit:back': => @run(true)
@@ -35,12 +36,14 @@ module.exports =
       @pushInHistory(@lastEditPosition) unless @hasNotChangedPosition()
 
   pushInHistory: () ->
-    historyMaxSize = atom.config.get('goto-last-edit.historySize')
     #if user is in the middle of the history, splice the forward elements
     if (@historyPosition < @history.length - 1)
       @history.splice(@historyPosition)
-    if (@history.length >= historyMaxSize)
-      @history.splice(0, @history.length - historyMaxSize + 1)
+    #if user is at the end of the history, remove firsts elements (FIFO)
+    if (@history.length >= @historyMaxSize)
+      elementsToRemove = @history.length - @historyMaxSize + 1
+      @history.splice(0, elementsToRemove)
+      @historyPosition -= elementsToRemove
     @history.push(@lastEditPosition)
     @historyPosition++
 
