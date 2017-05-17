@@ -5,7 +5,7 @@
       'command': 'goto-last-edit:back'
     }
     {
-      'label': 'Goto last edit - Froward'
+      'label': 'Goto last edit - Forward'
       'command': 'goto-last-edit:forward'
     }
   ]
