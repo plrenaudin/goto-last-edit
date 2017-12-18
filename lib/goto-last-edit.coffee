@@ -30,7 +30,8 @@ module.exports =
       @lastEditPosition = {
         pane: atom.workspace.getActivePane(),
         editor: editor,
-        position: editor.cursors[0]?.getBufferPosition()
+        position: editor.cursors[0]?.getBufferPosition(),
+        scrollTop: editor.getScrollTop()
       }
       #add position to history only if different
       @pushInHistory(@lastEditPosition) unless @hasNotChangedPosition()
@@ -61,26 +62,25 @@ module.exports =
       @lastEditPosition = if goBack then @history[@historyPosition - 1] else @history[@historyPosition + 1]
       if @lastEditPosition
         @historyPosition = if goBack then @historyPosition - 1 else @historyPosition + 1
-        if @lastEditPosition.editor.buffer.file?.path and @lastEditPosition.position
-          options = {
-            initialLine: @lastEditPosition.position.row,
-            initialColumn: @lastEditPosition.position.column,
-            activatePane: true,
-            searchAllPanes: true
-          }
-          atom.workspace.open(@lastEditPosition.editor.buffer.file?.path, options)
-        else
-          if @lastEditPosition.editor not in atom.workspace.getTextEditors()
+        if @lastEditPosition.editor not in atom.workspace.getTextEditors()
+          if @lastEditPosition.editor.buffer.file?.path and @lastEditPosition.position
+            options = {
+              initialLine: @lastEditPosition.position.row,
+              initialColumn: @lastEditPosition.position.column,
+              activatePane: true,
+              searchAllPanes: true
+            }
+            atom.workspace.open(@lastEditPosition.editor.buffer.file?.path, options)
             return
-          if @lastEditPosition.pane isnt atom.workspace.getActivePane()
-            @lastEditPosition.pane.activate()
-          if @lastEditPosition.editor isnt atom.workspace.getActiveTextEditor()
-            atom.workspace.getActivePane().activateItem(@lastEditPosition.editor)
-          atom.workspace.getActiveTextEditor().setCursorBufferPosition(
-            @lastEditPosition.position,
-            autoscroll: false
-          )
-          atom.workspace.getActiveTextEditor().scrollToCursorPosition(center: true)
+        if @lastEditPosition.pane isnt atom.workspace.getActivePane()
+          @lastEditPosition.pane.activate()
+        if @lastEditPosition.editor isnt atom.workspace.getActiveTextEditor()
+          atom.workspace.getActivePane().activateItem(@lastEditPosition.editor)
+        atom.workspace.getActiveTextEditor().setCursorBufferPosition(
+          @lastEditPosition.position,
+          autoscroll: false
+        )
+        atom.workspace.getActiveTextEditor().setScrollTop(@lastEditPosition.scrollTop)
       else if not goBack and @historyPosition == @history.length - 1
         @historyPosition++
 
